@@ -30,30 +30,45 @@ async function run() {
         await client.connect();
         // database collection
         const assignmentsCollection = client.db('assignmentsDB').collection('assignment');
+        const submitAssignmentCollection = client.db('assignmentsDB').collection('submitAssignment');
 
-        app.post('/assignments',async(req,res) => {
+        app.post('/assignments', async (req, res) => {
             // console.log("the data is:",req.body);
             const data = req.body;
             const result = await assignmentsCollection.insertOne(data);
             res.send(result)
         })
 
-        app.get('/assignments',async(req,res) =>{
+        app.get('/assignments', async (req, res) => {
             const filter = req.query.filter;
             // console.log(filter);
             let query = {}
-            if(filter) query = {diff: filter}
+            if (filter) query = { diff: filter }
             const result = await assignmentsCollection.find(query).toArray()
             res.send(result)
         })
 
-        app.delete('/assignments/:id',async(req,res) => {
+        app.use('/assignments/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await assignmentsCollection.findOne(query)
+            res.send(result)
+        })
+
+        app.delete('/assignments/:id', async (req, res) => {
             const id = req.params.id;
             // const dataEmail = req.query.email
-            const query = {_id: new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const result = await assignmentsCollection.deleteOne(query)
             res.send(result)
         })
+        // assignments submit
+        app.post('/submit-assignment', async (req, res) => {
+            const data = req.body;
+            const result = await submitAssignmentCollection.insertOne(data)
+            res.send(result)
+        })
+
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
@@ -69,10 +84,10 @@ run().catch(console.dir);
 
 
 // server
-app.get("/",async(req,res)=>{
+app.get("/", async (req, res) => {
     res.send("study loop is running no , what is this")
 })
-app.listen(port, ()=>{
+app.listen(port, () => {
     console.log(`the port is: ${port}`);
 })
 
