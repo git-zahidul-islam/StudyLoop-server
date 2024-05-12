@@ -48,10 +48,24 @@ async function run() {
             res.send(result)
         })
 
-        app.use('/assignments/:id', async (req, res) => {
+        app.get('/assignments/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const result = await assignmentsCollection.findOne(query)
+            res.send(result)
+        })
+
+        app.put('/assignments/:id',async(req,res) =>{
+            const id = req.params.id;
+            const assignment = req.body;
+            const query = {_id: new ObjectId(id)}
+            const option = {upsert: true}
+            const updateDoc = {
+                $set: {
+                    ...assignment,
+                },
+            }
+            const result = await assignmentsCollection.updateOne(query,updateDoc,option)
             res.send(result)
         })
 
