@@ -82,6 +82,12 @@ async function run() {
             const result = await submitAssignmentCollection.insertOne(data)
             res.send(result)
         })
+        
+        // app pending assignments
+        app.get('/submit-assignment',async(req,res) => {            
+            const result = await submitAssignmentCollection.find().toArray()
+            res.send(result)
+        })
 
         app.get('/submit-assignment/:email',async(req,res)=>{
             const email = req.params.email;
