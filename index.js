@@ -76,10 +76,17 @@ async function run() {
             const result = await assignmentsCollection.deleteOne(query)
             res.send(result)
         })
-        // assignments submit
+        // assignments submit 
         app.post('/submit-assignment', async (req, res) => {
             const data = req.body;
             const result = await submitAssignmentCollection.insertOne(data)
+            res.send(result)
+        })
+
+        app.get('/submit-assignment/:email',async(req,res)=>{
+            const email = req.params.email;
+            const query = {email: email}
+            const result = await submitAssignmentCollection.find(query).toArray()
             res.send(result)
         })
 
