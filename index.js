@@ -84,15 +84,37 @@ async function run() {
         })
         
         // app pending assignments
-        app.get('/submit-assignment',async(req,res) => {            
+        app.get('/pending-assignments',async(req,res) => {            
             const result = await submitAssignmentCollection.find().toArray()
             res.send(result)
         })
 
-        app.get('/submit-assignment/:email',async(req,res)=>{
+        app.get('/submit-assignment/:id',async(req,res)=>{
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)}
+            const result = await submitAssignmentCollection.findOne(query)
+            res.send(result)
+        })
+
+        app.get('/my-attempt/:email',async(req,res)=>{
             const email = req.params.email;
             const query = {email: email}
             const result = await submitAssignmentCollection.find(query).toArray()
+            res.send(result)
+        })
+
+        app.put('/give-mark/:id', async (req, res) => {
+            const id = req.params.id;
+            const mark = req.body;
+            const query = { _id: new ObjectId(id) }
+            const option = { upsert: true }
+            const updateDoc = {
+                $set: {
+                    ...mark,
+                },
+            }
+            // console.log(updateDoc);
+            const result = await submitAssignmentCollection.updateOne(query, updateDoc, option)
             res.send(result)
         })
 
