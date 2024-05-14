@@ -65,6 +65,7 @@ async function run() {
         // auth related api [01] cookie start
         app.post('/jwt', async (req, res) => {
             const user = req.body;
+            console.log("token get",user);
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
             // console.log("the jwt token: ", token);
             res
@@ -144,9 +145,18 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/my-attempt/:email',async (req, res) => {
-            const email = req.params.email;
-            const query = { email: email }
+        app.get('/my-attempt/',verifyToken,async (req, res) => {
+            // const email = req.query.email;
+            // console.log("query", req.query.email);
+            // console.log("token owner",req.user);
+            if (req?.user?.email !== req.query?.email){
+                return res.status(403).send({message: 'forbidden access'})
+            }
+            let query = {};
+            if(req.query?.email){
+                query = {email: req.query?.email}
+            }
+            // const query = { email: email }
             const result = await submitAssignmentCollection.find(query).toArray()
             res.send(result)
         })
@@ -182,7 +192,7 @@ run().catch(console.dir);
 
 // server
 app.get("/", async (req, res) => {
-    res.send("study loop is running no , what is this")
+    res.send("study loop is running , so lets try...................")
 })
 app.listen(port, () => {
     console.log(`the port is: ${port}`);
