@@ -134,7 +134,9 @@ async function run() {
 
         // app pending assignments
         app.get('/pending-assignments', async (req, res) => {
-            const result = await submitAssignmentCollection.find().toArray()
+            const status = req.query?.status;
+            const query = {status : status}
+            const result = await submitAssignmentCollection.find(query).toArray()
             res.send(result)
         })
 
@@ -165,7 +167,6 @@ async function run() {
                     ...mark,
                 },
             }
-            // console.log(updateDoc);
             const result = await submitAssignmentCollection.updateOne(query, updateDoc, option)
             res.send(result)
         })
