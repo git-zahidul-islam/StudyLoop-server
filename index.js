@@ -65,9 +65,8 @@ async function run() {
         // auth related api [01] cookie start
         app.post('/jwt', async (req, res) => {
             const user = req.body;
-            console.log("token get",user);
+            console.log("token get", user);
             const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
-            // console.log("the jwt token: ", token);
             res
                 .cookie('token', token, cookieOptions)
                 .send({ message: true })
@@ -82,7 +81,6 @@ async function run() {
         // cookei end
 
         app.post('/assignments', async (req, res) => {
-            // console.log("the data is:",req.body);
             const data = req.body;
             const result = await assignmentsCollection.insertOne(data);
             res.send(result)
@@ -90,7 +88,7 @@ async function run() {
 
         app.get('/assignments', async (req, res) => {
             const filter = req.query.filter;
-            // console.log(filter);
+            console.log(filter);
             let query = {}
             if (filter) query = { diff: filter }
             const result = await assignmentsCollection.find(query).toArray()
@@ -118,13 +116,17 @@ async function run() {
             res.send(result)
         })
 
-        app.delete('/assignments/:id', async (req, res) => {
-            const id = req.params.id;
-            // const dataEmail = req.query.email
-            const query = { _id: new ObjectId(id) }
-            const result = await assignmentsCollection.deleteOne(query)
-            res.send(result)
+        app.delete('/assignments/:email', async (req, res) => {
+           const userEmail = req.params?.email;
+           const owner = req?.query?.email
+           if(userEmail !== owner){
+            return res.send({message: 'unAuthorized'})
+           }
+           const query = {email: userEmail}
+           const result = await assignmentsCollection.deleteOne(query)
+           res.send(result)
         })
+        
         // assignments submit 
         app.post('/submit-assignment', async (req, res) => {
             const data = req.body;
@@ -135,7 +137,7 @@ async function run() {
         // app pending assignments
         app.get('/pending-assignments', async (req, res) => {
             const status = req.query?.status;
-            const query = {status : status}
+            const query = { status: status }
             const result = await submitAssignmentCollection.find(query).toArray()
             res.send(result)
         })
@@ -147,10 +149,10 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/my-attempt/:email',verifyToken,async (req, res) => {
+        app.get('/my-attempt/:email', verifyToken, async (req, res) => {
             const email = req.params.email;
-            if (req?.user?.email !== email){
-                return res.status(403).send({message: 'forbidden access'})
+            if (req?.user?.email !== email) {
+                return res.status(403).send({ message: 'forbidden access' })
             }
             const query = { email: email }
             const result = await submitAssignmentCollection.find(query).toArray()
@@ -183,8 +185,6 @@ async function run() {
 run().catch(console.dir);
 
 
-
-
 // server
 app.get("/", async (req, res) => {
     res.send("study loop is running , so lets try...................")
@@ -192,7 +192,3 @@ app.get("/", async (req, res) => {
 app.listen(port, () => {
     console.log(`the port is: ${port}`);
 })
-
-
-
-// "test": "echo \"Error: no test specified\" && exit 1"
