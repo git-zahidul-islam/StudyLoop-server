@@ -145,18 +145,12 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/my-attempt/',verifyToken,async (req, res) => {
-            // const email = req.query.email;
-            // console.log("query", req.query.email);
-            // console.log("token owner",req.user);
-            if (req?.user?.email !== req.query?.email){
+        app.get('/my-attempt/:email',verifyToken,async (req, res) => {
+            const email = req.params.email;
+            if (req?.user?.email !== email){
                 return res.status(403).send({message: 'forbidden access'})
             }
-            let query = {};
-            if(req.query?.email){
-                query = {email: req.query?.email}
-            }
-            // const query = { email: email }
+            const query = { email: email }
             const result = await submitAssignmentCollection.find(query).toArray()
             res.send(result)
         })
