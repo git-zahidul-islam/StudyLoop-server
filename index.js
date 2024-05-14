@@ -12,6 +12,8 @@ const port = process.env.PORT || 5000;
 app.use(cors({
     origin: [
         'http://localhost:5173',
+        'https://study-loop-2a160.web.app',
+        'https://study-loop-2a160.firebaseapp.com'
     ],
     credentials: true
 }))
@@ -56,7 +58,6 @@ const cookieOptions = {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
         // database collection
         const assignmentsCollection = client.db('assignmentsDB').collection('assignment');
         const submitAssignmentCollection = client.db('assignmentsDB').collection('submitAssignment');
@@ -167,7 +168,7 @@ async function run() {
 
 
         // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
+        // await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
