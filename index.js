@@ -61,6 +61,7 @@ async function run() {
         // database collection
         const assignmentsCollection = client.db('assignmentsDB').collection('assignment');
         const submitAssignmentCollection = client.db('assignmentsDB').collection('submitAssignment');
+        const userCollection = client.db('assignmentsDB').collection('userCollection');
 
         // auth related api [01] cookie start
         app.post('/jwt', async (req, res) => {
@@ -80,6 +81,33 @@ async function run() {
 
         // cookei end
 
+        // user count api
+        app.get('/user-count',async(req,res)=>{
+            const assignmentCreate = await assignmentsCollection.estimatedDocumentCount()
+            const user = await userCollection.estimatedDocumentCount()
+            const submitAssignment = await submitAssignmentCollection.estimatedDocumentCount()
+            res.send({
+                assignmentCreate,
+                user,
+                submitAssignment
+            })
+        })
+
+
+        app.post('/users', async (req, res) => {
+            const data = req.body;
+
+            const query = {email: data?.email}
+            const existingUser = await userCollection.findOne(query)
+            if(existingUser){
+                return res.send({ message: 'already have user', insertedId: null})
+            }
+
+            const result = await userCollection.insertOne(data)
+            res.send(result)
+        })
+        
+        // assignments api 
         app.post('/assignments', async (req, res) => {
             const data = req.body;
             const result = await assignmentsCollection.insertOne(data);
@@ -117,16 +145,16 @@ async function run() {
         })
 
         app.delete('/assignments/:email', async (req, res) => {
-           const userEmail = req.params?.email;
-           const owner = req?.query?.email
-           if(userEmail !== owner){
-            return res.send({message: 'unAuthorized'})
-           }
-           const query = {email: userEmail}
-           const result = await assignmentsCollection.deleteOne(query)
-           res.send(result)
+            const userEmail = req.params?.email;
+            const owner = req?.query?.email
+            if (userEmail !== owner) {
+                return res.send({ message: 'unAuthorized' })
+            }
+            const query = { email: userEmail }
+            const result = await assignmentsCollection.deleteOne(query)
+            res.send(result)
         })
-        
+
         // assignments submit 
         app.post('/submit-assignment', async (req, res) => {
             const data = req.body;
